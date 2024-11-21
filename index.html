@@ -1,0 +1,1096 @@
+<html><head>
+    <title>$TATE</title>
+    <link rel="icon" href="trumppic.png" type="image/x-icon">
+<style>
+#minimap {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    border: 2px solid #0f0;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+#jumpscareOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    background: black;
+}
+
+#jumpscareImage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    max-width: 100vw;
+    max-height: 100vh;
+    animation: jumpscare 0.5s ease-in forwards;
+}
+
+@keyframes jumpscare {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+    }
+}
+
+#cooldownTimer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #ff0;
+    border: 2px solid #ff0;
+    border-radius: 5px;
+    font-size: 1.2em;
+    text-shadow: 0 0 5px #ff0;
+}
+
+.projectile {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: yellow;
+    border-radius: 50%;
+    box-shadow: 0 0 5px yellow;
+}
+
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: url('back69.jpg') no-repeat center center fixed; /* Updated background */
+    background-size: cover; /* Ensures the image covers the entire background */
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+#titleScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.title {
+    color: #0f0;
+    font-size: 4em;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+.start-button {
+    padding: 15px 30px;
+    font-size: 1.5em;
+    background: #0f0;
+    border: none;
+    color: black;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.start-button:hover {
+    background: #00ff00;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #0f0;
+}
+
+.merch-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1001;
+    padding: 15px 30px;
+    font-size: 1.5em;
+    background: #ff8c00;
+    border: none;
+    color: black;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.merch-button:hover {
+    background: #ffa033;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #ff8c00;
+}
+
+.wishlist-button {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1001;
+    padding: 15px 30px;
+    font-size: 1.5em;
+    background: #4B0082;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.wishlist-button:hover {
+    background: #6A0DAD;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #4B0082;
+}
+
+.story {
+    color: #fff;
+    max-width: 600px;
+    text-align: center;
+    margin: 20px auto;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #0f0;
+    border-radius: 10px;
+    line-height: 1.5;
+    font-size: 1.1em;
+}
+
+.title-image {
+    width: 400px;
+    height: auto;
+    margin-bottom: 20px;
+    border: 3px solid #0f0;
+    box-shadow: 0 0 20px #0f0;
+}
+
+#gameContainer {
+    position: relative;
+}
+
+#maze {
+    border: 8px solid #ff8c00;
+    box-shadow: 0 0 15px #ff8c00;
+}
+
+.cell {
+    width: 80px;
+    height: 80px;
+}
+
+.wall {
+    background: #0f0;
+}
+
+.player {
+    background: #ff0;
+    border-radius: 50%;
+}
+
+.goal {
+    background: #f00;
+}
+
+#winScreen, #gameOverScreen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    color: #f00;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-size: 2em;
+    z-index: 100;
+    text-align: center;
+    padding: 20px;
+}
+
+#winScreen {
+    color: #0f0;
+}
+
+.glow {
+    text-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+.glow-red {
+    text-shadow: 0 0 10px #f00, 0 0 20px #f00, 0 0 30px #f00;
+    animation: glow-red 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0;
+    }
+    to {
+        text-shadow: 0 0 20px #0f0, 0 0 30px #0f0, 0 0 40px #0f0;
+    }
+}
+
+@keyframes glow-red {
+    from {
+        text-shadow: 0 0 10px #f00, 0 0 20px #f00, 0 0 30px #f00;
+    }
+    to {
+        text-shadow: 0 0 20px #f00, 0 0 30px #f00, 0 0 40px #f00;
+    }
+}
+
+.retry-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 0.7em;
+    background: #f00;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.retry-button:hover {
+    background: #ff2222;
+}
+
+/* Add styles for the store modal */
+.store-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    padding: 30px;
+    border: 3px solid #4B0082;
+    border-radius: 15px;
+    z-index: 1002;
+    color: white;
+    text-align: center;
+    max-width: 600px;
+    box-shadow: 0 0 30px #4B0082;
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.wishlist-btn {
+    background: #4B0082;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    cursor: pointer;
+    font-size: 1.2em;
+}
+
+.wishlist-btn:hover {
+    background: #6A0DAD;
+}
+</style>
+</head>
+<body>
+<audio id="bgMusic" loop>
+    <source src="https://file.garden/ZxmC4yQL6hzekzvV/gardenofbenben/sounds/halloweennew.mp3" type="audio/mpeg">
+</audio>
+<audio id="jumpscareSound">
+    <source src="https://file.garden/ZxmC4yQL6hzekzvV/gardenofbenben/sounds/jumpscare.mp3" type="audio/mpeg">
+</audio>
+<audio id="gunshotSound">
+    <source src="https://file.garden/ZxmC4yQL6hzekzvV/gardenofbenben/sounds/gunshot.mp3" type="audio/mpeg">
+</audio>
+<audio id="victorySound">
+    <source src="https://file.garden/ZxmC4yQL6hzekzvV/gardenofbenben/sounds/victory.mp3" type="audio/mpeg">
+</audio>
+<div id="titleScreen">
+    <h1 class="title">TATE</h1>
+    <div class="story">
+        Help Andrew Tate escape the trenches! #TATE <br><br>Instructions: Click on the screen to fire.
+    </div>
+    <img src="https://file.garden/ZxmC4yQL6hzekzvV/gardenofbenben/images/benbengroup.png" alt="Group of BenBen characters" class="title-image">
+    <button class="start-button" onclick="startGame()">Start Game</button>
+</div>
+<button class="merch-button" onclick="window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')">Click Here!</button>
+
+<div class="store-modal" id="storeModal">
+    <button class="close-modal" onclick="closeStoreModal()">×</button>
+    <h2>Garden of Benben 2: The Reckoning</h2>
+    <p>Coming Soon in 2024!</p>
+    <img src="https://file.garden/ZxmC4yQL6hzekzvV/gardenofbenben/images/benbengroup.png" alt="Garden of Benben 2 Preview" style="width: 300px; margin: 20px 0;">
+    <p>The evil BenBen returns with new friends and more challenging mazes! Face new enemies, discover new weapons, and uncover the dark secrets of the Garden.</p>
+    <p>Features:</p>
+    <ul style="list-style: none; padding: 0;">
+        <li>✨ New Terrifying Enemies</li>
+        <li>🌟 Enhanced Graphics</li>
+        <li>💫 Multiple Endings</li>
+        <li>🎮 New Game Mechanics</li>
+    </ul>
+    <button class="wishlist-btn" onclick="wishlist()">Add to Wishlist</button>
+</div>
+
+<div id="gameContainer">
+    <canvas id="maze" width="800" height="600"></canvas>
+</div>
+<canvas id="minimap" width="200" height="200"></canvas>
+<div id="cooldownTimer">Ready to Fire!</div>
+<div id="winScreen">
+    <h1 class="glow">You Win!</h1>
+    <p>You helped Tate escape the trenches! WAGMI</p>
+</div>
+<div id="gameOverScreen">
+    <h1 class="glow-red">Game Over!</h1>
+    <p id="gameOverMessage"></p>
+    <button class="retry-button" onclick="restartGame()">Try Again</button>
+</div>
+
+<div id="jumpscareOverlay">
+    <img id="jumpscareImage" alt="jumpscare enemy">
+</div>
+
+<script>
+let gameStarted = false;
+const canvas = document.getElementById('maze');
+const ctx = canvas.getContext('2d');
+const winScreen = document.getElementById('winScreen');
+const cooldownDisplay = document.getElementById('cooldownTimer');
+let cooldownTimer = 0;
+const gameOverScreen = document.getElementById('gameOverScreen');
+const gameOverMessage = document.getElementById('gameOverMessage');
+const cellSize = 80;
+const mazeWidth = 30;
+const mazeHeight = 30;
+const viewportWidth = canvas.width;
+const viewportHeight = canvas.height;
+const minimap = document.getElementById('minimap');
+const minimapCtx = minimap.getContext('2d');
+const minimapScale = minimap.width / (mazeWidth * cellSize);
+
+let gameWon = false;
+let gameOver = false;
+let player = { x: cellSize * 1.5, y: cellSize * 1.5, speed: 6, immune: false };
+let goal = { x: 0, y: 0 };
+let maze = [];
+let camera = { x: 0, y: 0 };
+let projectiles = [];
+let canShoot = true;
+const PROJECTILE_SPEED = 15;
+const PROJECTILE_SIZE = 10;
+const SHOOT_COOLDOWN = 3000; // 3 seconds
+
+const enemyMessages = {
+    'mark.png': "Andrew got rugged... gl next time! Help Tate escape the trenches! $TATE",
+    'benben.png': "Andrew got rugged... gl next time! Help Tate escape the trenches! $TATE",
+    'bird.png': "Andrew got rugged... gl next time! Help Tate escape the trenches! $TATE",
+    'benbengirl.png': "Andrew got rugged... gl next time! Help Tate escape the trenches! $TATE",
+    'flan.png': "Andrew got rugged... gl next time! Help Tate escape the trenches! $TATE"
+};
+
+    // Load wall texture
+    const wallTexture = new Image();
+    wallTexture.src = 'https://file.garden/ZxmC4yQL6hzekzvV/gardenofbenben/images/hedge.png';
+
+    // Load player sprite
+    const playerSprite = new Image();
+    playerSprite.src = 'trumppic.png';
+
+
+const enemies = [];
+const SPAWN_INTERVAL = 15000; // Spawn new enemies every 15 seconds
+const MAX_ENEMIES = 50; // Maximum number of enemies allowed
+const CHASE_DISTANCE = cellSize * 6; // Distance at which enemies start chasing
+const WANDER_CHANGE_DIRECTION = 1000; // How often enemies change wander direction (ms)
+
+const enemyTypes = [
+    { sprite: 'https://file.garden/ZxmC4yQL6hzekzvV/gardenofbenben/images/mark.png', speed: 2.0 },
+    { sprite: 'https://file.garden/ZxmC4yQL6hzekzvV/gardenofbenben/images/benben.png', speed: 1.8 },
+    { sprite: 'https://file.garden/ZxmC4yQL6hzekzvV/gardenofbenben/images/bird.png', speed: 3.5 },
+    { sprite: 'https://file.garden/ZxmC4yQL6hzekzvV/gardenofbenben/images/benbengirl.png', speed: 1.5 },
+    { sprite: 'https://file.garden/ZxmC4yQL6hzekzvV/gardenofbenben/images/flan.png', speed: 1.0 }
+];
+
+function showWinScreen() {
+    winScreen.style.display = 'flex';
+    gameWon = true;
+    // Play victory sound
+    const victorySound = document.getElementById('victorySound');
+    victorySound.currentTime = 0; // Reset sound to start
+    victorySound.play();
+}
+
+function showGameOver(enemyType) {
+    if (gameOver) return;
+    
+    const enemyFileName = enemyType.sprite.split('/').pop();
+    const jumpscareOverlay = document.getElementById('jumpscareOverlay');
+    const jumpscareImage = document.getElementById('jumpscareImage');
+    const jumpscareSound = document.getElementById('jumpscareSound');
+    
+    // Play jumpscare sound
+    jumpscareSound.currentTime = 0; // Reset sound to start
+    jumpscareSound.play();
+    
+    // Set and show jumpscare
+    jumpscareImage.src = enemyType.sprite;
+    jumpscareOverlay.style.display = 'block';
+    
+    // Play jumpscare animation then show game over screen
+    setTimeout(() => {
+        jumpscareOverlay.style.display = 'none';
+        gameOverMessage.textContent = enemyMessages[enemyFileName];
+        gameOverScreen.style.display = 'flex';
+        gameOver = true;
+    }, 1000);
+}
+
+function restartGame() {
+    player.x = cellSize * 1.5;
+    player.y = cellSize * 1.5;
+    player.immune = true;
+    gameOver = false;
+    gameOverScreen.style.display = 'none';
+    document.getElementById('jumpscareOverlay').style.display = 'none';
+    if (!musicStarted) {
+        bgMusic.play();
+        musicStarted = true;
+    }
+    
+    setTimeout(() => {
+        player.immune = false;
+    }, 3000);
+}
+
+function generateMaze() {
+    maze = Array(mazeHeight).fill().map(() => Array(mazeWidth).fill(1));
+    
+    function carve(x, y) {
+        maze[y][x] = 0;
+        
+        const directions = [
+            [0, -2], [2, 0], [0, 2], [-2, 0]
+        ].sort(() => Math.random() - 0.5);
+        
+        for (let [dx, dy] of directions) {
+            const newX = x + dx;
+            const newY = y + dy;
+            
+            if (newX > 0 && newX < mazeWidth - 1 && newY > 0 && newY < mazeHeight - 1 && maze[newY][newX] === 1) {
+                maze[y + dy/2][x + dx/2] = 0;
+                carve(newX, newY);
+            }
+        }
+    }
+    
+    // Start with regular maze generation
+    carve(1, 1);
+    
+    // Add additional random paths
+    for (let i = 0; i < 10; i++) {
+        let x = Math.floor(Math.random() * (mazeWidth-2)) + 1;
+        let y = Math.floor(Math.random() * (mazeHeight-2)) + 1;
+        
+        if (maze[y][x] === 1) {
+            maze[y][x] = 0;
+            for (let j = 0; j < 3; j++) {
+                // More complex path generation with diagonal possibilities
+                const directions = [
+                    [1,0], [-1,0], [0,1], [0,-1],
+                    [1,1], [-1,-1], [1,-1], [-1,1]
+                ];
+                const [dx, dy] = directions[Math.floor(Math.random() * directions.length)];
+                
+                if (x + dx > 0 && x + dx < mazeWidth-1 && y + dy > 0 && y + dy < mazeHeight-1) {
+                    x += dx;
+                    y += dy;
+                    maze[y][x] = 0;
+                    // Occasionally create wider paths
+                    if (Math.random() < 0.3) {
+                        if (x + 1 < mazeWidth-1) maze[y][x+1] = 0;
+                        if (y + 1 < mazeHeight-1) maze[y+1][x] = 0;
+                    }
+                }
+            }
+        }
+    }
+    
+    maze[1][1] = 0;
+    
+    let maxDistance = 0;
+    let goalPos = { x: 1, y: 1 };
+    
+    for (let y = 1; y < mazeHeight - 1; y++) {
+        for (let x = 1; x < mazeWidth - 1; x++) {
+            if (maze[y][x] === 0) {
+                const distance = Math.abs(x - 1) + Math.abs(y - 1);
+                if (distance > maxDistance) {
+                    maxDistance = distance;
+                    goalPos = { x, y };
+                }
+            }
+        }
+    }
+    
+    goal.x = goalPos.x * cellSize;
+    goal.y = goalPos.y * cellSize;
+}
+
+function spawnNewEnemy() {
+    if (gameWon || gameOver || enemies.length >= MAX_ENEMIES) return;
+    
+    let validPosition = false;
+    let x, y;
+    
+    while (!validPosition) {
+        x = Math.floor(Math.random() * (mazeWidth-2)) + 1;
+        y = Math.floor(Math.random() * (mazeHeight-2)) + 1;
+        if (maze[y][x] === 0 && 
+            (Math.abs(x - 1) + Math.abs(y - 1) > 4)) {
+            validPosition = true;
+        }
+    }
+
+    const enemyType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+    enemies.push({
+        x: x * cellSize + cellSize/2,
+        y: y * cellSize + cellSize/2,
+        dx: Math.random() * 2 - 1,
+        dy: Math.random() * 2 - 1,
+        speed: enemyType.speed,
+        sprite: enemyType.image,
+        lastDirectionChange: Date.now(),
+        path: [],
+        pathIndex: 0,
+        lastPathfind: 0
+    });
+}
+
+function spawnEnemies() {
+    enemyTypes.forEach(type => {
+        const sprite = new Image();
+        sprite.src = type.sprite;
+        type.image = sprite;
+    });
+
+    // Spawn initial enemies
+    for (let i = 0; i < 20; i++) {
+        spawnNewEnemy();
+    }
+}
+
+function updateCamera() {
+    camera.x = player.x - viewportWidth/2;
+    camera.y = player.y - viewportHeight/2;
+    
+    camera.x = Math.max(0, Math.min(camera.x, mazeWidth * cellSize - viewportWidth));
+    camera.y = Math.max(0, Math.min(camera.y, mazeHeight * cellSize - viewportHeight));
+}
+
+function drawMaze() {
+    if (gameWon) return;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    const startX = Math.floor(camera.x / cellSize);
+    const startY = Math.floor(camera.y / cellSize);
+    const endX = Math.ceil((camera.x + viewportWidth) / cellSize);
+    const endY = Math.ceil((camera.y + viewportHeight) / cellSize);
+    
+    for (let y = startY; y < endY; y++) {
+        for (let x = startX; x < endX; x++) {
+            if (y >= 0 && y < mazeHeight && x >= 0 && x < mazeWidth && maze[y][x] === 1) {
+                ctx.drawImage(wallTexture, 
+                    x * cellSize - camera.x, 
+                    y * cellSize - camera.y, 
+                    cellSize, 
+                    cellSize);
+            }
+        }
+    }
+    
+    ctx.fillStyle = '#f00';
+    ctx.fillRect(goal.x - camera.x, goal.y - camera.y, cellSize, cellSize);
+    
+    // Adjust player transparency
+    if (player.immune) {
+        ctx.globalAlpha = 1.0; // Set to fully opaque
+    } else {
+        ctx.globalAlpha = 1.0; // Keep player fully opaque
+    }
+
+    // Add glow effect for the player
+    ctx.shadowColor = 'yellow'; // Set the shadow color
+    ctx.shadowBlur = 30; // Increased blur amount for a bigger glow
+    ctx.drawImage(playerSprite,
+        player.x - camera.x - cellSize/3,
+        player.y - camera.y - cellSize/3,
+        cellSize*2/3,
+        cellSize*2/3
+    );
+    ctx.shadowBlur = 0; // Reset shadow blur
+    ctx.globalAlpha = 1.0; // Reset global alpha to fully opaque
+}
+
+function manhattan(x1, y1, x2, y2) {
+    return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+}
+
+function getNeighbors(x, y) {
+    const neighbors = [];
+    const dirs = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+    
+    for (let [dx, dy] of dirs) {
+        const newX = x + dx;
+        const newY = y + dy;
+        if (newX >= 0 && newX < mazeWidth && 
+            newY >= 0 && newY < mazeHeight && 
+            maze[newY][newX] === 0) {
+            neighbors.push([newX, newY]);
+        }
+    }
+    return neighbors;
+}
+
+function findPath(startX, startY, endX, endY) {
+    const gridStartX = Math.floor(startX / cellSize);
+    const gridStartY = Math.floor(startY / cellSize);
+    const gridEndX = Math.floor(endX / cellSize);
+    const gridEndY = Math.floor(endY / cellSize);
+    
+    const openSet = new Set();
+    const closedSet = new Set();
+    const cameFrom = new Map();
+    const gScore = new Map();
+    const fScore = new Map();
+    
+    const start = `${gridStartX},${gridStartY}`;
+    openSet.add(start);
+    gScore.set(start, 0);
+    fScore.set(start, manhattan(gridStartX, gridStartY, gridEndX, gridEndY));
+    
+    while (openSet.size > 0) {
+        let current = null;
+        let lowestF = Infinity;
+        
+        for (let pos of openSet) {
+            if (fScore.get(pos) < lowestF) {
+                lowestF = fScore.get(pos);
+                current = pos;
+            }
+        }
+        
+        if (current === `${gridEndX},${gridEndY}`) {
+            const path = [];
+            let curr = current;
+            while (cameFrom.has(curr)) {
+                const [x, y] = curr.split(',').map(Number);
+                path.unshift([x * cellSize + cellSize/2, y * cellSize + cellSize/2]);
+                curr = cameFrom.get(curr);
+            }
+            return path;
+        }
+        
+        openSet.delete(current);
+        closedSet.add(current);
+        
+        const [x, y] = current.split(',').map(Number);
+        const neighbors = getNeighbors(x, y);
+        
+        for (let [nx, ny] of neighbors) {
+            const neighbor = `${nx},${ny}`;
+            if (closedSet.has(neighbor)) continue;
+            
+            const tentativeG = gScore.get(current) + 1;
+            
+            if (!openSet.has(neighbor)) {
+                openSet.add(neighbor);
+            } else if (tentativeG >= gScore.get(neighbor)) {
+                continue;
+            }
+            
+            cameFrom.set(neighbor, current);
+            gScore.set(neighbor, tentativeG);
+            fScore.set(neighbor, tentativeG + manhattan(nx, ny, gridEndX, gridEndY));
+        }
+    }
+    
+    return null;
+}
+
+function updateEnemies() {
+    if (gameWon || gameOver) return;
+
+    const currentTime = Date.now();
+
+    enemies.forEach(enemy => {
+        // Calculate distance to player
+        const dx = player.x - enemy.x;
+        const dy = player.y - enemy.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // Determine if enemy should chase or wander
+        if (distance < CHASE_DISTANCE) {
+            // Update path every second
+            if (currentTime - enemy.lastPathfind > 1000) {
+                enemy.path = findPath(enemy.x, enemy.y, player.x, player.y) || [];
+                enemy.pathIndex = 0;
+                enemy.lastPathfind = currentTime;
+            }
+            
+            if (enemy.path.length > 0) {
+                const target = enemy.path[enemy.pathIndex];
+                if (target) {
+                    const dx = target[0] - enemy.x;
+                    const dy = target[1] - enemy.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < enemy.speed) {
+                        enemy.pathIndex++;
+                    } else {
+                        enemy.dx = dx / dist;
+                        enemy.dy = dy / dist;
+                    }
+                }
+            } else {
+                // Direct chase if no path found
+                const normalizedDx = dx / distance;
+                const normalizedDy = dy / distance;
+                enemy.dx = normalizedDx;
+                enemy.dy = normalizedDy;
+            }
+        } else {
+            // WANDER MODE
+            // Change direction periodically
+            if (currentTime - enemy.lastDirectionChange > WANDER_CHANGE_DIRECTION) {
+                enemy.dx = Math.random() * 2 - 1;
+                enemy.dy = Math.random() * 2 - 1;
+                // Normalize wandering direction
+                const magnitude = Math.sqrt(enemy.dx * enemy.dx + enemy.dy * enemy.dy);
+                enemy.dx /= magnitude;
+                enemy.dy /= magnitude;
+                enemy.lastDirectionChange = currentTime;
+            }
+        }
+
+        // Calculate new position
+        const newX = enemy.x + enemy.dx * enemy.speed;
+        const newY = enemy.y + enemy.dy * enemy.speed;
+        
+        // Check collisions and move
+        const padding = cellSize/3;
+        if (!checkCollision(newX - padding, newY - padding) &&
+            !checkCollision(newX + padding, newY - padding) &&
+            !checkCollision(newX - padding, newY + padding) &&
+            !checkCollision(newX + padding, newY + padding)) {
+            enemy.x = newX;
+            enemy.y = newY;
+        } else {
+            // If collision, reverse direction in wandering mode
+            if (distance >= CHASE_DISTANCE) {
+                enemy.dx *= -1;
+                enemy.dy *= -1;
+                enemy.lastDirectionChange = currentTime;
+            }
+        }
+
+        // Check for player collision
+        const playerDist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
+        if (playerDist < cellSize/3 && !player.immune) {
+            const enemyType = enemyTypes.find(type => type.image === enemy.sprite);
+            showGameOver(enemyType);
+        }
+    });
+}
+
+function drawEnemies() {
+    enemies.forEach(enemy => {
+        ctx.drawImage(enemy.sprite,
+            enemy.x - camera.x - cellSize/2,
+            enemy.y - camera.y - cellSize/2,
+            cellSize,
+            cellSize
+        );
+    });
+}
+
+function checkCollision(x, y) {
+    const gridX = Math.floor(x / cellSize);
+    const gridY = Math.floor(y / cellSize);
+    
+    return maze[gridY][gridX] === 1;
+}
+
+let keys = {};
+
+function movePlayer() {
+    if (gameWon || gameOver) return;
+    
+    let dx = 0;
+    let dy = 0;
+    
+    if (keys['ArrowUp'] || keys['w']) dy -= player.speed;
+    if (keys['ArrowDown'] || keys['s']) dy += player.speed;
+    if (keys['ArrowLeft'] || keys['a']) dx -= player.speed;
+    if (keys['ArrowRight'] || keys['d']) dx += player.speed;
+    
+    if (dx !== 0 && dy !== 0) {
+        dx *= 0.707;
+        dy *= 0.707;
+    }
+    
+    const newX = player.x + dx;
+    const newY = player.y + dy;
+    
+    const padding = cellSize/6;
+    if (!checkCollision(newX - padding, newY - padding) &&
+        !checkCollision(newX + padding, newY - padding) &&
+        !checkCollision(newX - padding, newY + padding) &&
+        !checkCollision(newX + padding, newY + padding)) {
+        player.x = newX;
+        player.y = newY;
+    }
+    
+    const distance = Math.hypot(player.x - goal.x - cellSize/2, player.y - goal.y - cellSize/2);
+    if (distance < cellSize) {
+        showWinScreen();
+    }
+}
+
+document.addEventListener('keydown', (e) => {
+    keys[e.key.toLowerCase()] = true;
+});
+
+document.addEventListener('keyup', (e) => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+// Music handling
+const bgMusic = document.getElementById('bgMusic');
+let musicStarted = false;
+
+// Function to start music on first interaction
+function startMusic() {
+    if (!musicStarted) {
+        bgMusic.play();
+        musicStarted = true;
+        document.removeEventListener('keydown', startMusic);
+    }
+}
+
+// Start music on first keypress
+document.addEventListener('keydown', startMusic);
+
+function createProjectile(startX, startY, targetX, targetY) {
+    if (!canShoot) return;
+    
+    // Play gunshot sound
+    const gunshotSound = document.getElementById('gunshotSound');
+    gunshotSound.currentTime = 0; // Reset sound to start
+    gunshotSound.play();
+    
+    const angle = Math.atan2(targetY - (player.y - camera.y), targetX - (player.x - camera.x));
+    const velocity = {
+        x: Math.cos(angle) * PROJECTILE_SPEED,
+        y: Math.sin(angle) * PROJECTILE_SPEED
+    };
+    
+    projectiles.push({
+        x: player.x,
+        y: player.y,
+        velocity
+    });
+
+    // Start cooldown
+    canShoot = false;
+    cooldownTimer = SHOOT_COOLDOWN / 1000;
+    cooldownDisplay.textContent = `Cooldown: ${cooldownTimer}s`;
+    
+    const cooldownInterval = setInterval(() => {
+        cooldownTimer--;
+        if (cooldownTimer <= 0) {
+            cooldownDisplay.textContent = 'Ready to Fire!';
+            clearInterval(cooldownInterval);
+        } else {
+            cooldownDisplay.textContent = `Cooldown: ${cooldownTimer}s`;
+        }
+    }, 1000);
+
+    setTimeout(() => {
+        canShoot = true;
+    }, SHOOT_COOLDOWN);
+}
+
+function updateProjectiles() {
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+        const projectile = projectiles[i];
+        projectile.x += projectile.velocity.x;
+        projectile.y += projectile.velocity.y;
+        
+        // Check wall collisions
+        if (checkCollision(projectile.x, projectile.y)) {
+            projectiles.splice(i, 1);
+            continue;
+        }
+        
+        // Check enemy collisions
+        for (let j = enemies.length - 1; j >= 0; j--) {
+            const enemy = enemies[j];
+            const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y);
+            if (dist < cellSize/2) {
+                enemies.splice(j, 1);
+                projectiles.splice(i, 1);
+                break;
+            }
+        }
+    }
+}
+
+function drawProjectiles() {
+    ctx.fillStyle = 'yellow';
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = 'yellow';
+    
+    projectiles.forEach(projectile => {
+        ctx.beginPath();
+        ctx.arc(
+            projectile.x - camera.x,
+            projectile.y - camera.y,
+            PROJECTILE_SIZE/2,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+    });
+    
+    ctx.shadowBlur = 0;
+}
+
+function drawMinimap() {
+    minimapCtx.clearRect(0, 0, minimap.width, minimap.height);
+    
+    // Draw maze walls
+    minimapCtx.fillStyle = '#0f0';
+    for (let y = 0; y < mazeHeight; y++) {
+        for (let x = 0; x < mazeWidth; x++) {
+            if (maze[y][x] === 1) {
+                minimapCtx.fillRect(
+                    x * cellSize * minimapScale,
+                    y * cellSize * minimapScale,
+                    cellSize * minimapScale,
+                    cellSize * minimapScale
+                );
+            }
+        }
+    }
+    
+    // Draw goal
+    minimapCtx.fillStyle = '#f00';
+    minimapCtx.fillRect(
+        goal.x * minimapScale,
+        goal.y * minimapScale,
+        cellSize * minimapScale,
+        cellSize * minimapScale
+    );
+    
+    // Draw enemies
+    minimapCtx.fillStyle = '#f0f';
+    enemies.forEach(enemy => {
+        minimapCtx.fillRect(
+            enemy.x * minimapScale - 2,
+            enemy.y * minimapScale - 2,
+            4,
+            4
+        );
+    });
+    
+    // Draw player
+    minimapCtx.fillStyle = '#ff0';
+    minimapCtx.beginPath();
+    minimapCtx.arc(
+        player.x * minimapScale,
+        player.y * minimapScale,
+        3,
+        0,
+        Math.PI * 2
+    );
+    minimapCtx.fill();
+}
+
+function gameLoop() {
+    if (!gameStarted) return;
+    movePlayer();
+    updateEnemies();
+    updateProjectiles();
+    updateCamera();
+    drawMaze();
+    drawProjectiles();
+    drawEnemies();
+    drawMinimap();
+    requestAnimationFrame(gameLoop);
+}
+
+function startGame() {
+    document.getElementById('titleScreen').style.display = 'none';
+    generateMaze();
+    spawnEnemies();
+    setInterval(spawnNewEnemy, SPAWN_INTERVAL);
+    gameStarted = true;
+    startMusic();
+    gameLoop();
+}
+
+canvas.addEventListener('click', (e) => {
+    if (!gameOver && !gameWon) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        createProjectile(player.x, player.y, x, y);
+    }
+});
+
+function showStoreModal() {
+    document.getElementById('storeModal').style.display = 'block';
+}
+
+function closeStoreModal() {
+    document.getElementById('storeModal').style.display = 'none';
+}
+
+function wishlist() {
+    alert('Thanks for your interest! The game has been added to your wishlist.');
+    closeStoreModal();
+}
+
+// Close modal if clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('storeModal');
+    if (event.target == modal) {
+        closeStoreModal();
+    }
+}
+
+gameLoop();
+</script>
+</body></html>
